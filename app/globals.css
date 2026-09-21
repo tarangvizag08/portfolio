@@ -1,0 +1,409 @@
+@import 'tailwindcss';
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme {
+  /* ---- Palette ----
+     Built around the AeroShards green, #517A60.
+     That exact value is a mid-tone, and mid-tones carry text badly: cream on
+     it measures 4.11:1 and near-black 3.70:1, so *neither* clears the 4.5:1
+     needed for body copy. Rather than change your colour, AeroShards keeps
+     #517A60 and a thin veil sits over it (see .page-veil), which deepens the
+     effective ground to ~#426449. Against that, cream reaches 5.60:1 and the
+     muted tier 4.61:1 — both pass, and the hue is untouched.
+     The accent had to go light for the same reason; the bright amber is kept
+     as --color-accent-glow for decorative effects on dark card surfaces. */
+  --color-background: #517a60;
+  --color-surface: #2c4636;
+  --color-surface-muted: #35523f;
+  --color-border: #6e8f79;
+  --color-foreground: #efeee9;
+  --color-muted-foreground: #cfdad3;
+  --color-accent: #f8d49b;
+  --color-accent-foreground: #17231b;
+  --color-accent-secondary: #b8e6ec;
+  --color-accent-glow: #f5a524;
+  --color-destructive: #ffb4ab;
+  --color-cream: #efeee9;
+
+  /* ---- Type ----
+     One typeface across the whole site. The landing hero set the editorial
+     voice in Helvetica Neue ME; the sections below now speak it too, so the
+     seam between hero and page disappears. `font-mono` is kept as a Tailwind
+     alias so existing markup keeps working — it just resolves to the same
+     family, used for small tracked-out labels rather than a second typeface. */
+  --font-hn: 'Helvetica Neue ME', Helvetica, Arial, sans-serif;
+  --font-sans: var(--font-hn);
+  --font-mono: var(--font-hn);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    scroll-padding-top: 5rem;
+    @apply font-sans;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+    @apply bg-background text-foreground;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-hn);
+    line-height: 1.15;
+    letter-spacing: -0.02em;
+  }
+
+  /* Visible focus ring everywhere — never removed, only restyled. */
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  ::selection {
+    background: var(--color-accent);
+    color: var(--color-accent-foreground);
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+}
+
+/* Mandatory reduced-motion short-circuit. Everything renders in its
+   final state instantly; nothing loops. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    transition-delay: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Shared component primitives ---------- */
+
+.section-shell {
+  width: 100%;
+  max-width: 72rem;
+  margin-inline: auto;
+  padding-inline: 1.25rem;
+}
+
+@media (min-width: 768px) {
+  .section-shell {
+    padding-inline: 2rem;
+  }
+}
+
+/* Thin scrollbar for the one intentional horizontal strip. */
+.scroll-strip {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.scroll-strip::-webkit-scrollbar {
+  height: 8px;
+}
+
+.scroll-strip::-webkit-scrollbar-track {
+  background: var(--color-surface-muted);
+  border-radius: 999px;
+}
+
+.scroll-strip::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 999px;
+}
+
+.scroll-strip::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* Radar-sweep motif — used once, behind the hero stat rail. */
+@keyframes radar-sweep {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.radar-sweep {
+  animation: radar-sweep 8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .radar-sweep {
+    animation: none;
+  }
+}
+
+/* ================= Landing hero animations ================= */
+/* All four use `both` fill mode so the element holds its start frame during
+   its delay and its end frame afterwards. The reduced-motion block above
+   collapses every duration and delay, so each one lands instantly. */
+
+@keyframes hero-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes hero-rise-in {
+  from { opacity: 0; transform: translateY(4vh) scale(1.03); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes hero-fade-up {
+  from { opacity: 0; transform: translateY(28px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes hero-line {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+.anim-fade-in {
+  animation: hero-fade-in 1.2s ease-out both;
+}
+
+.anim-rise-in {
+  animation: hero-rise-in 1.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-fade-up {
+  animation: hero-fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.anim-line {
+  transform-origin: left;
+  animation: hero-line 1.1s cubic-bezier(0.76, 0, 0.24, 1) both;
+}
+
+@keyframes hero-marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+
+.marquee {
+  animation: hero-marquee 30s linear infinite;
+}
+
+/* ================= Scroll reveals ================= */
+/* Driven by IntersectionObserver adding .is-visible (see components/ui/reveal).
+   Transform + opacity only, so nothing triggers layout. Reduced motion is
+   handled by the global block above, which flattens every duration and delay. */
+
+.sr {
+  opacity: 0;
+  transition:
+    opacity 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    transform 700ms cubic-bezier(0.22, 1, 0.36, 1),
+    filter 700ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: opacity, transform;
+}
+
+.sr-up      { transform: translate3d(0, 34px, 0); }
+.sr-left    { transform: translate3d(-40px, 0, 0); }
+.sr-right   { transform: translate3d(40px, 0, 0); }
+.sr-scale   { transform: scale(0.94); }
+.sr-blur    { filter: blur(10px); transform: translate3d(0, 20px, 0); }
+
+.sr.is-visible {
+  opacity: 1;
+  transform: none;
+  filter: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sr {
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+/* A hairline that draws itself in as a section arrives. */
+.rule-draw {
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 900ms cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.rule-draw.is-visible { transform: scaleX(1); }
+
+/* ================= Hero: keep the name on his cap ================= */
+/*
+ * The hero photo is 3024x4032 and fills the viewport with object-cover, so on
+ * a landscape screen the crop is driven by WIDTH and the vertical window slides
+ * with viewport height. That means the cap's position on screen is a function
+ * of both vw and vh — pin the name to a fixed vh and it drifts off his head as
+ * soon as the window changes shape.
+ *
+ * Measured from the source frame (Adobe subject detection): the hat's top edge
+ * is at 42.29% of the image height, its centre at ~44.79%. Substituting the
+ * object-cover geometry at object-position 50% 50% gives the name's top as
+ * 37vh - 6.95vw, which lands the 26vh line box centred on the cap at every
+ * landscape size. Portrait is simpler: cover is height-driven there, so there
+ * is no vertical crop and the cap centre is just 44.79vh.
+ */
+:root {
+  --hero-name-top: 37.4vh;              /* portrait: 45.44vh cap centre - half of 16vh */
+  --hero-band-height: 40vh;
+  --hero-band-top: 25.4vh;              /* 45.44vh cap centre - half the band */              --background: oklch(1 0 0);              --foreground: oklch(0.145 0 0);              --card: oklch(1 0 0);              --card-foreground: oklch(0.145 0 0);              --popover: oklch(1 0 0);              --popover-foreground: oklch(0.145 0 0);              --primary: oklch(0.205 0 0);              --primary-foreground: oklch(0.985 0 0);              --secondary: oklch(0.97 0 0);              --secondary-foreground: oklch(0.205 0 0);              --muted: oklch(0.97 0 0);              --muted-foreground: oklch(0.556 0 0);              --accent: oklch(0.97 0 0);              --accent-foreground: oklch(0.205 0 0);              --destructive: oklch(0.577 0.245 27.325);              --border: oklch(0.922 0 0);              --input: oklch(0.922 0 0);              --ring: oklch(0.708 0 0);              --chart-1: oklch(0.87 0 0);              --chart-2: oklch(0.556 0 0);              --chart-3: oklch(0.439 0 0);              --chart-4: oklch(0.371 0 0);              --chart-5: oklch(0.269 0 0);              --radius: 0.625rem;              --sidebar: oklch(0.985 0 0);              --sidebar-foreground: oklch(0.145 0 0);              --sidebar-primary: oklch(0.205 0 0);              --sidebar-primary-foreground: oklch(0.985 0 0);              --sidebar-accent: oklch(0.97 0 0);              --sidebar-accent-foreground: oklch(0.205 0 0);              --sidebar-border: oklch(0.922 0 0);              --sidebar-ring: oklch(0.708 0 0);
+}
+
+@media (min-aspect-ratio: 3/4) {
+  :root {
+    --hero-name-top: calc(37vh - 6.08vw);
+    --hero-band-height: 48vh;
+    /* Centred on the cap: cap centre is (50vh - 6.95vw), minus half the band. */
+    --hero-band-top: calc(26vh - 6.08vw);
+  }
+}
+
+/*
+ * The band that keeps the name readable.
+ *
+ * Measured, not guessed: sampling the photo across the rows the name crosses
+ * (source rows 1562-2053) and compositing black over them shows that at ~0.51
+ * combined alpha — what the previous scrim gave — 14% of those pixels fell
+ * below 4.5:1 against the cream. That is exactly the "name fades in places"
+ * symptom: it held over the dark X-wing and washed out over sunlit foliage.
+ * At 0.60 combined, no sampled pixel falls below 4.5:1 and the worst 5% sits
+ * at 5.7:1. The page scrim already contributes ~0.25 here, so this band peaks
+ * at 0.50 to land there, ramped over five stops so its edges never show.
+ */
+.hero-name-band {
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.22) 16%,
+    rgba(0, 0, 0, 0.5) 42%,
+    rgba(0, 0, 0, 0.5) 58%,
+    rgba(0, 0, 0, 0.22) 84%,
+    rgba(0, 0, 0, 0) 100%
+  );
+}
+
+/* Deepens the AeroShards green just enough for text to clear contrast.
+   Sits above the backdrop and below all content. */
+.page-veil {
+  position: fixed;
+  inset: 0;
+  z-index: -5;
+  pointer-events: none;
+  background: rgba(0, 0, 0, 0.18);
+}
+
+/* ScrollFloat ships as display type: clamp(1.6rem, 8vw, 10rem), weight 900,
+   centred. These are section headings, so they get the site's heading scale
+   back. `.scroll-float` clips overflow, hence the padding for descenders. */
+.scroll-float {
+  padding-bottom: 0.12em;
+}
+
+h2[id$='-heading'],
+.scroll-float-text.section-float-text {
+  color: #000;
+}
+
+.scroll-float-text.section-float-text {
+  font-size: clamp(1.5rem, 3.4vw, 2.25rem);
+  font-weight: 600;
+  text-align: left;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+@theme inline {
+  --font-heading: var(--font-sans);
+  --font-sans: var(--font-sans);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --foreground: oklch(0.985 0 0);
+  --card: oklch(0.205 0 0);
+  --card-foreground: oklch(0.985 0 0);
+  --popover: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.985 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --secondary: oklch(0.269 0 0);
+  --secondary-foreground: oklch(0.985 0 0);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --accent: oklch(0.269 0 0);
+  --accent-foreground: oklch(0.985 0 0);
+  --destructive: oklch(0.704 0.191 22.216);
+  --border: oklch(1 0 0 / 10%);
+  --input: oklch(1 0 0 / 15%);
+  --ring: oklch(0.556 0 0);
+  --chart-1: oklch(0.87 0 0);
+  --chart-2: oklch(0.556 0 0);
+  --chart-3: oklch(0.439 0 0);
+  --chart-4: oklch(0.371 0 0);
+  --chart-5: oklch(0.269 0 0);
+  --sidebar: oklch(0.205 0 0);
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+}
